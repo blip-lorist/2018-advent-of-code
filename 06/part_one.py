@@ -56,8 +56,8 @@ class CoordinateGrid:
 
 
 def main():
-    input_file = "mini_input.txt"
-    #input_file = "input.txt"
+    #input_file = "mini_input.txt"
+    input_file = "input.txt"
     with open(input_file, "r") as f:
         coordinates = f.readlines()
 
