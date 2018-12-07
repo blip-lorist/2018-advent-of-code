@@ -1,7 +1,7 @@
 from ordered_set import OrderedSet
 
-input_file = "mini_input.txt"
-#input_file = "input.txt"
+#input_file = "mini_input.txt"
+input_file = "input.txt"
 with open(input_file, "r") as f:
     steps = f.readlines()
 
@@ -38,6 +38,7 @@ for step in steps:
     step = step.split(" ")
     prereq_step = step[1]
     next_step = step[7]
+    import pdb; pdb.set_trace()
 
     # start the tree
     if len(tree) == 0:
@@ -49,37 +50,33 @@ for step in steps:
 
 
     if prereq_step not in tree:
-        prereq = prereq_lookup.get(prereq_step, None)
-        if meets_requirements(prereq, tree):
-            available.append(prereq_step)
-            available_step = available[0]
-            tree.append(available_step)
-            available.append(next_step)
-            available.discard(available_step)
-            continue
+        available.append(prereq_step)
 
     if next_step not in tree:
-        prereq = prereq_lookup[next_step]
-        if meets_requirements(prereq, tree):
-            available.append(next_step)
-            available = OrderedSet(sorted(available))
-            available_step = available[0]
-            tree.append(available_step)
-            available.discard(available_step)
-            continue
+        available.append(next_step)
 
     available = OrderedSet(sorted(available))
+    available_added = False
     for available_step in available:
-        if meets_requirements(prereq_lookup[available_step], tree) and available_step not in tree:
+        prereq = prereq_lookup.get(available_step, None)
+        if meets_requirements(prereq, tree) and available_step not in tree:
             tree.append(available_step)
+            import pdb; pdb.set_trace()
             available.discard(available_step)
-        elif len(tree) == (len(prereq_lookup) + 1): # the tree is complete
-            continue
-        else:
-            raise Exception("No action could be taken!")
+            available_added = True
+            break
+
+    if available_added:
+        continue
+
+    if len(tree) == (len(prereq_lookup) + 1): # the tree is complete
+        continue
+    else:
+        # no action can be taken this turn
+        continue
 
 
-print(tree)
+print("".join(tree))
 
 
     # if bst is  empty, insert prereq, put next_step in holding
