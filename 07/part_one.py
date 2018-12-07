@@ -1,3 +1,5 @@
+from ordered_set import OrderedSet
+
 input_file = "mini_input.txt"
 #input_file = "input.txt"
 with open(input_file, "r") as f:
@@ -17,7 +19,7 @@ def meets_requirements(prereqs, tree):
     return True
 
 tree = []
-available = []
+available = OrderedSet()
 prereq_lookup = {}
 
 # Build prereq dictionary for each step
@@ -38,28 +40,39 @@ for step in steps:
     next_step = step[7]
 
     # start the tree
-    if prereq_step not in tree:
+    if len(tree) == 0:
         prereq = prereq_lookup.get(prereq_step, None)
         if meets_requirements(prereq, tree):
             tree.append(prereq_step)
             available.append(next_step)
             continue
 
-    if next_step not in tree:
-        if meets_requirements(prereq_lookup[next_step], tree):
+
+    if prereq_step not in tree:
+        prereq = prereq_lookup.get(prereq_step, None)
+        if meets_requirements(prereq, tree):
+            available.append(prereq_step)
+            available_step = available[0]
+            tree.append(available_step)
             available.append(next_step)
-            available = sorted(available)
-            next_step = available.pop(0)
-            tree.append(next_step)
+            available.discard(available_step)
             continue
 
-    available = sorted(available)
+    if next_step not in tree:
+        prereq = prereq_lookup[next_step]
+        if meets_requirements(prereq, tree):
+            available.append(next_step)
+            available = OrderedSet(sorted(available))
+            available_step = available[0]
+            tree.append(available_step)
+            available.discard(available_step)
+            continue
+
+    available = OrderedSet(sorted(available))
     for available_step in available:
         if meets_requirements(prereq_lookup[available_step], tree) and available_step not in tree:
             tree.append(available_step)
-            if available_step == prereq_step:
-                available.append(next_step)
-            continue
+            available.discard(available_step)
         elif len(tree) == (len(prereq_lookup) + 1): # the tree is complete
             continue
         else:
