@@ -47,7 +47,12 @@ def recursive_find_children(tree, children=[]):
 
 
 def main():
-    tree = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2".split(" ")
+    with open("input.txt","r") as f:
+        tree = f.readlines()
+    tree = [x.strip() for x in tree]
+    tree = tree[0].split(" ")
+
+    #tree = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2".split(" ")
     children = recursive_find_children(tree)
     metadata_sum = 0
     for child in children:
