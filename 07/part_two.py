@@ -13,14 +13,21 @@ class TaskManager():
         if len(self.queue) == 0:
             return None
 
-        available_tasks = self.queue
+        available_tasks = []
+        for task_name in self.queue:
+            if self.grant_permission(task_name):
+                available_tasks.append(task_name)
+
         available_tasks = sorted(available_tasks)
+        if len(available_tasks) == 0:
+            return None
+
         new_task_name = available_tasks.pop(0)
         self.queue.remove(new_task_name)
         return Task(new_task_name)
 
-    def grant_permission(self, task):
-        task_prereqs = self.prereqs.get(task.name, None)
+    def grant_permission(self, task_name):
+        task_prereqs = self.prereqs.get(task_name, None)
 
         if task_prereqs is None:
             return True
@@ -116,9 +123,9 @@ def main():
         print("Second {}".format(elapsed_seconds))
 
         # debugging
-        workers_with_tasks = [worker for worker in pool if worker.assigned_task is not None]
-        if elapsed_seconds > 0 and len(task_manager.queue) > 5 and len(workers_with_tasks) != 5:
-            raise Exception("Not all workers have tasks")
+        #workers_with_tasks = [worker for worker in pool if worker.assigned_task is not None]
+        #if elapsed_seconds > 0 and len(task_manager.queue) > 5 and len(workers_with_tasks) != 5:
+        #    raise Exception("Not all workers have tasks")
 
         # Workers check if they can start work
         for idx, worker in enumerate(pool):
@@ -138,7 +145,7 @@ def main():
             print("Worker {}".format(idx + 1))
             task = worker.assigned_task
 
-            if task is not None and task_manager.grant_permission(task):
+            if task is not None and task_manager.grant_permission(task.name):
                 worker.status = "working"
                 print(worker.assigned_task.name)
             else:
