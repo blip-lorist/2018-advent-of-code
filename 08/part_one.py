@@ -1,3 +1,6 @@
+import sys
+sys.setrecursionlimit(10000)
+
 class Node:
     def __init__(self, children_count, metadata_count, metadata):
         self.children_count = children_count
