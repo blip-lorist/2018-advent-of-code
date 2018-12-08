@@ -1,3 +1,5 @@
+import string
+
 class TaskManager():
     # Generates tasks to give to workers
     # Pushes completed tasks to a finished list
@@ -5,16 +7,20 @@ class TaskManager():
         self.queue = task_queue
         self.prereqs = prereqs
         self.finished_tasks = []
+        self.total_task_count = len(self.queue)
 
     def get_next_task(self):
         if len(self.queue) == 0:
-            raise Exception("No more tasks!")
+            return None
 
-        new_task_name = self.queue.pop(0)
+        available_tasks = self.queue
+        available_tasks = sorted(available_tasks)
+        new_task_name = available_tasks.pop(0)
+        self.queue.remove(new_task_name)
         return Task(new_task_name)
 
     def grant_permission(self, task):
-        task_prereqs = self.prereqs.get(task, None)
+        task_prereqs = self.prereqs.get(task.name, None)
 
         if task_prereqs is None:
             return True
@@ -23,31 +29,50 @@ class TaskManager():
             if prereq not in self.finished_tasks:
                 return False
 
+
+        return True
+
+    def mark_done(self, task):
+        self.finished_tasks.append(task.name)
+
+    def all_tasks_complete(self):
+        if len(self.finished_tasks) == self.total_task_count:
             return True
 
+        return False
+
 class Worker:
-    # After initializing, a worker will
-    # - retrieve a task from the task manager
-    # - Check if the task can be started
-    # - track time remaining for the task
 
     def __init__(self):
         self.assigned_task = None
         self.status = "idle"
 
     def receive_task(self, task):
-        self.assigned_task = task.name
+        self.assigned_task = task
+
+    def do_work(self):
+        if self.status == "working":
+            task = self.assigned_task
+            task.remaining_time -= 1
+
+    def is_finished(self):
+        task = self.assigned_task
+        if task is None:
+            return False
+
+        if task.remaining_time == 0:
+            return True
+
+        return False
 
 class Task:
     def __init__(self, name):
         self.name = name
-
-
-
+        self.remaining_time = (string.ascii_uppercase.index(self.name) + 1) + 60
 
 def get_permissions_lookup():
-    input_file = "mini_input.txt"
-    #input_file = "input.txt"
+    #input_file = "mini_input.txt"
+    input_file = "input.txt"
     with open(input_file, "r") as f:
         steps = f.readlines()
 
@@ -71,36 +96,69 @@ def get_permissions_lookup():
 
 def main():
     # Instantiate task manager and workers
-    task_queue = list("CABFDE")
+    #task_queue = list("CABFDE")
+    task_queue = list("AHJDBEMNFQUPVXGCTYLWZKSROI")
     permissions = get_permissions_lookup()
     task_manager = TaskManager(task_queue, permissions)
-    worker_one = Worker()
-    worker_two = Worker()
-    pool = [worker_one, worker_two]
+    pool = []
+    for num in range(1,6):
+        pool.append(Worker())
 
-    # Workers are assigned work
-    for worker in pool:
-        next_task = task_manager.get_next_task()
-        worker.receive_task(next_task)
+
+    ## Workers are assigned work
+    #for worker in pool:
+    #    next_task = task_manager.get_next_task()
+    #    worker.receive_task(next_task)
 
     elapsed_seconds = 0
-    while len(task_manager.finished_tasks) < len(task_queue):
+    while not task_manager.all_tasks_complete():
     # Second starts
+        print("Second {}".format(elapsed_seconds))
+
+        # debugging
+        workers_with_tasks = [worker for worker in pool if worker.assigned_task is not None]
+        if elapsed_seconds > 0 and len(task_manager.queue) > 5 and len(workers_with_tasks) != 5:
+            raise Exception("Not all workers have tasks")
+
         # Workers check if they can start work
-        for worker in pool:
-            if task_manager.grant_permission(worker.assigned_task):
-                worker.status = "working"
-            else:
+        for idx, worker in enumerate(pool):
+
+            # Check if workers are finished, mark tasks complete
+            if worker.is_finished():
+                task_manager.mark_done(worker.assigned_task)
+                worker.assigned_task = None
                 worker.status = "idle"
 
-        import pdb; pdb.set_trace()
-             # Workers check if they can mark work finished
-             # Print
-                # second
-                # worker's current task
-                # finished tasks
-        # second ends
+            # Assign work if worker is available
+            if worker.status == "idle" and worker.assigned_task is None:
+                next_task = task_manager.get_next_task()
+                worker.receive_task(next_task)
 
+            # Check if workers have permission to start
+            print("Worker {}".format(idx + 1))
+            task = worker.assigned_task
+
+            if task is not None and task_manager.grant_permission(task):
+                worker.status = "working"
+                print(worker.assigned_task.name)
+            else:
+                worker.status = "idle"
+                print(".")
+
+
+            worker.do_work()
+
+
+        # second ends
+        print("Finished tasks")
+        print(task_manager.finished_tasks)
+        print("")
+
+        if not task_manager.all_tasks_complete():
+            elapsed_seconds += 1
+
+
+    print("Total elapsed seconds {}".format(elapsed_seconds))
 
 
 main()
