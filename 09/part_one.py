@@ -1,6 +1,10 @@
 import operator
 from llist import dllist
 
+# Answer not submitted to AoC due to conceding and looking at other solutions
+# Thanks to this, I went the linked list rotation route: https://www.reddit.com/r/adventofcode/comments/a4i97s/2018_day_9_solutions/ebepyc7
+# Used dllist instead of a deque
+
 def play_marbles(num_players, max_marble_value):
 
     circle = dllist()
