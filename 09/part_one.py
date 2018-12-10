@@ -1,42 +1,41 @@
+import operator
 from llist import dllist
-def play_marbles(num_players, max_score):
+
+def play_marbles(num_players, max_marble_value):
 
     circle = dllist()
+    circle.append(0)
     scorecard = {}
     highest_score = 0
-    marble_value = 0
+    marble_value = 1
     current_marble_idx = 0
 
-    #while highest_score < max_score:
-    while marble_value < 26:
+    while marble_value <= max_marble_value:
+    #while True:
         for player in range(1, num_players + 1):
             # place marble
-            current_marble_idx = place_marble(circle, marble_value, current_marble_idx)
+            current_marble_idx = place_marble(circle, marble_value, current_marble_idx, player, scorecard)
 
-            #score = calculate_points(player, marble_value)
-
-            # track max score
-            #if score > max_score:
-            #    max_score = score
-
-            # add points to scorecard
-            #if player in scorecard.keys():
-            #    scorecard[player] += score
-            #else:
-            #    scorecard[player] = score
 
             marble_value += 1
-            print(circle)
+            #if marble_value == max_marble_value:
+            #    break
+
+            if len(scorecard) == 0:
+                highest_score = 0
+            else:
+                highest_score =  max(scorecard.items(), key=operator.itemgetter(1))[1]
 
 
-def place_marble(circle, marble_value, current_marble_idx):
+    highest_score =  max(scorecard.items(), key=operator.itemgetter(1))[1]
+    print(highest_score)
+
+
+def place_marble(circle, marble_value, current_marble_idx, player, scorecard):
     total_marble_count = circle.size
-    if total_marble_count == 0:
-        last_marble_idx = None
-    else:
-        last_marble_idx = total_marble_count - 1
+    last_marble_idx = total_marble_count - 1
 
-    if total_marble_count  == 0 or total_marble_count == 1:
+    if total_marble_count == 1:
         # When the circle contains none or one marble
         circle.append(marble_value)
         current_marble_idx = circle.size - 1
@@ -45,8 +44,17 @@ def place_marble(circle, marble_value, current_marble_idx):
     if marble_value % 23 == 0:
         remove_marble_idx = current_marble_idx - 7
         marble_to_remove = circle.nodeat(remove_marble_idx)
+
+        score = marble_value + marble_to_remove.value
         circle.remove(marble_to_remove)
         current_marble_idx = remove_marble_idx
+
+        # update scorecard
+        if player in scorecard.keys():
+            scorecard[player] += score
+        else:
+            scorecard[player] = score
+
         return current_marble_idx
 
     if current_marble_idx == last_marble_idx:
@@ -71,7 +79,8 @@ def place_marble(circle, marble_value, current_marble_idx):
 
     return current_marble_idx
 
-play_marbles(9, 32)
+play_marbles(30, 5807)
+#play_marbles(458, 71307)
 
 
 
