@@ -60,6 +60,7 @@ while True:
     # Crude heuristic #2: If the larger ASCII has more than 20 shared x values, then likely text
     # It worked!
     if float(sorted(ascii_stats.values())[-1]) > 20:
+        print(seconds)
         # likely to be text
         # Draw the points
         for y in range(min_y, max_y+1):
