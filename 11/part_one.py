@@ -3,22 +3,19 @@
 # serial number
 
 
-def fuel_cell_grid(size_of_grid, serial_number):
-    for y in range(1, size_of_grid + 1):
+def generate_fuel_cell_grid(size_of_grid, serial_number):
+    grid = []
+    for idx_y, y in enumerate(range(1, size_of_grid + 1)):
         row = []
-        for x in range (1, size_of_grid + 1):
-            #if (x + 2 > 300) || (y + 2 > 300):
-                # skip if 3x3 block does not fit into grid
-            #    continue
-            if (x > 32 and x < 36) and (y > 44 and y < 48):
-                power_level = get_power_level(x, y, serial_number)
-                row.append(power_level)
+        for idx_x, x in enumerate(range(1, size_of_grid + 1)):
+            #if (x > 32 and x < 36) and (y > 44 and y < 48):
+            power_level = get_power_level(x, y, serial_number)
+            row.append(power_level)
 
-        if len(row) > 0:
-            print(row)
+        #if len(row) != 0:
+        grid.append(row)
 
-
-
+    return grid
 
 def get_power_level(x, y, serial_number):
     rack_id = x + 10
@@ -40,4 +37,4 @@ def get_power_level(x, y, serial_number):
 #print(get_power_level(217,196,39))
 #print(get_power_level(101,153,71))
 
-fuel_cell_grid(48, 18)
+grid = generate_fuel_cell_grid(48, 18)
