@@ -1,4 +1,4 @@
-with open("mini_input.txt", "r") as f:
+with open("input.txt", "r") as f:
     spread_patterns = f.readlines()
 
 spread_patterns = [x.strip() for x in spread_patterns]
@@ -10,8 +10,14 @@ for spread_pattern in spread_patterns:
     outcome = outcome.strip()
     spread_pattern_lookup[spread_pattern] = outcome
 
-initial_state = list(".........#..#.#..##......###...###...........")
-for gen in range(1,21):
+initial_state = "##....#.#.#...#.#..#.#####.#.#.##.#.#.#######...#.##....#..##....#.#..##.####.#..........#..#...#"
+#initial_state = "#..#.#..##......###...###"
+growing_room = (len(initial_state)/2) * "."
+initial_state = growing_room + initial_state + growing_room
+initial_state = list(initial_state)
+last_state = []
+last_gen = 20
+for gen in range(1,last_gen + 1):
     next_state = []
     for idx, pot in enumerate(initial_state):
         neighbor_idx = range(idx - 2, idx + 3)
@@ -26,9 +32,19 @@ for gen in range(1,21):
         pot_outcome = spread_pattern_lookup.get(neighbors, ".")
         next_state.append(pot_outcome)
 
-    print("".join(next_state))
+    #print("".join(next_state))
     initial_state = next_state
+    if gen == (last_gen):
+        last_state = next_state
 
+
+plant_sum = 0
+for idx, state in enumerate(last_state):
+    if state == "#":
+        # remove offset from index
+        plant_sum += (idx - len(growing_room))
+
+print(plant_sum)
 
 
 
